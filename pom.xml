@@ -95,7 +95,11 @@
                                     <arg line="-o ${project.build.directory}/v${upstreamVersion}.zip -d ${project.build.directory}" />
                                 </exec>
                                 <echo message="moving resources" />
-                                <move file="${extractDir}/src" toDir="${destDir}" />
+                                <move toDir="${destDir}">
+                                    <fileset dir="${extractDir}">
+                                        <include name="**/*" />
+                                    </fileset>
+                                </move>
                             </target>
                         </configuration>
                     </execution>
