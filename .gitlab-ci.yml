@@ -1,0 +1,53 @@
+# Copyright (c) 2024–2026 Tomshley
+#
+# Licensed under the Apache License, Version 2.0
+
+include:
+  - project: 'tomshley/brands/global/tware/tech/products/provisioning/cicd-pipelines'
+    ref: 'v0.4.20'
+    file:
+      - '/gitlab/ci/.stages-base.yml'
+      - '/gitlab/ci/.gitflow-base.yml'
+      - '/gitlab/ci/.gitflow-branch-policy.yml'
+      - '/gitlab/ci/.gitflow-jobs.yml'
+      - '/gitlab/ci/.artifact-tags.yml'
+      - '/gitlab/ci/.artifact-publish-policy.yml'
+      - '/gitlab/ci/.security-scanning.yml'
+      - '/gitlab/ci/.sbt-runtime.yml'
+
+variables:
+  CICD_PIPELINES_RUNNER_TAG: "0.4.20"
+
+# ── Build ─────────────────────────────────────────────────────────────────
+
+compile:
+  extends:
+    - .tomshley-sbt-runtime
+    - .policy-runs-on-any-branch
+  stage: build
+  script:
+    - apk add --no-cache maven
+    - mvn clean package -s settings.xml
+  artifacts:
+    paths:
+      - target/*.jar
+
+# ── Deploy (gitflow-governed) ─────────────────────────────────────────────
+
+deploy:
+  extends:
+    - .tomshley-sbt-runtime
+    - .flow-artifact-publish
+  stage: deploy
+  rules:
+    - if: '$TOMSHLEY_CICD_FLOW_TYPE == "tag"'
+      when: manual
+  script:
+    - |
+      if [ -f ".secure_files/.env" ]; then
+        set -a
+        . .secure_files/.env
+        set +a
+      fi
+    - apk add --no-cache maven
+    - mvn deploy -s settings.xml
