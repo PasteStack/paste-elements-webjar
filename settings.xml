@@ -1,0 +1,15 @@
+<settings>
+    <servers>
+        <server>
+            <id>gitlab-maven</id>
+            <username>${env.GL_USERNAME}</username>
+            <password>${env.GL_PASSWORD}</password>
+            <configuration>
+                <authenticationInfo>
+                    <userName>${env.GL_USERNAME}</userName>
+                    <password>${env.GL_PASSWORD}</password>
+                </authenticationInfo>
+            </configuration>
+        </server>
+    </servers>
+</settings>
