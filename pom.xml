@@ -5,10 +5,27 @@
     <packaging>jar</packaging>
     <groupId>com.pastestack</groupId>
     <artifactId>paste-elements-webjar</artifactId>
-    <version>0.1.0</version>
+    <version>0.2.0</version>
     <name>paste-elements-webjar</name>
     <description>WebJar for PasteStack Elements UI components (JS + SCSS)</description>
     <url>https://github.com/PasteStack/paste-elements</url>
+
+    <repositories>
+        <repository>
+            <id>gitlab-maven</id>
+            <url>https://gitlab.com/api/v4/projects/70289607/packages/maven</url>
+        </repository>
+    </repositories>
+    <distributionManagement>
+        <repository>
+            <id>gitlab-maven</id>
+            <url>https://gitlab.com/api/v4/projects/70289607/packages/maven</url>
+        </repository>
+        <snapshotRepository>
+            <id>gitlab-maven</id>
+            <url>https://gitlab.com/api/v4/projects/70289607/packages/maven</url>
+        </snapshotRepository>
+    </distributionManagement>
 
     <licenses>
         <license>
@@ -34,7 +51,7 @@
 
     <properties>
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
-        <upstreamVersion>0.1.0</upstreamVersion>
+        <upstreamVersion>0.2.0</upstreamVersion>
         <upstream.url>https://github.com/PasteStack/paste-elements</upstream.url>
         <extractDir>${project.build.directory}/paste-elements-${upstreamVersion}</extractDir>
         <destDir>${project.build.outputDirectory}/META-INF/resources/webjars/${project.artifactId}/${upstreamVersion}</destDir>
