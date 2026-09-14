@@ -27,10 +27,13 @@
         </snapshotRepository>
     </distributionManagement>
 
+    <!-- The jar contains only the packaged upstreamVersion, so this names that
+         version's license. It moves to Apache-2.0 in the same change that raises
+         upstreamVersion to the first relicensed paste-elements release. -->
     <licenses>
         <license>
             <name>MIT License</name>
-            <url>https://raw.githubusercontent.com/PasteStack/paste-elements/main/LICENSE</url>
+            <url>https://opensource.org/license/mit</url>
             <distribution>repo</distribution>
         </license>
     </licenses>
