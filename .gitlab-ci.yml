@@ -1,10 +1,10 @@
 include:
   - project: 'tomshley/brands/global/tware/tech/products/provisioning/cicd-pipelines'
-    ref: 'v0.9.0'
+    ref: 'v0.9.1'
     file: '/adapters/gitlab/ci/adapter.yml'
 
 variables:
-  CICD_PIPELINES_RUNNER_TAG: "0.9.0"
+  CICD_PIPELINES_RUNNER_TAG: "0.9.1"
   BASE_CONTAINERS_REGISTRY: registry.gitlab.com/tomshley/brands/global/tware/tech/products/provisioning/base-containers
   BASE_CONTAINERS_UPSTREAM_TAG: "0.5.0"
   # Maven is the toolchain here and no house runner image carries it, so these
@@ -73,11 +73,11 @@ test:
     - |
       for jar in target/*.jar; do
         test -s "$jar" || { echo "empty artifact: $jar" >&2; exit 1; }
-        unzip -l "$jar" | grep -q "META-INF/resources/webjars/${artifact}/" \
+        unzip -l "$jar" | grep "META-INF/resources/webjars/${artifact}/" >/dev/null \
           || { echo "no webjar resources for ${artifact} in $jar" >&2; exit 1; }
         # The jar redistributes upstream's sources, so upstream's license text
         # must travel with them.
-        unzip -l "$jar" | grep -q "META-INF/resources/webjars/${artifact}/[^ ]*LICENSE" \
+        unzip -l "$jar" | grep "META-INF/resources/webjars/${artifact}/[^ ]*LICENSE" >/dev/null \
           || { echo "no upstream LICENSE in $jar" >&2; exit 1; }
       done
 
