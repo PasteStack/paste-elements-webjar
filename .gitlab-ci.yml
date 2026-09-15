@@ -6,7 +6,7 @@ include:
 variables:
   CICD_PIPELINES_RUNNER_TAG: "0.9.1"
   BASE_CONTAINERS_REGISTRY: registry.gitlab.com/tomshley/brands/global/tware/tech/products/provisioning/base-containers
-  BASE_CONTAINERS_UPSTREAM_TAG: "0.5.0"
+  BASE_CONTAINERS_UPSTREAM_TAG: "0.6.0"
   # Maven is the toolchain here and no house runner image carries it, so these
   # jobs pin a public Maven image and stay off the toolbox scripts, which only
   # exist inside the house images.
