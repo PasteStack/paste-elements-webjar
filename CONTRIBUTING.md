@@ -8,7 +8,7 @@ model. It is intentionally opinionated.
 
 ## Philosophy
 
-- Packaging only: the jar carries an upstream release, unmodified
+- Packaging only: the jar carries an upstream release or pinned development package, unmodified
 - The packaged version, its license and its notices always agree
 
 Changes that increase complexity, size, or scope without strong justification are unlikely
@@ -23,6 +23,9 @@ to be accepted.
 
 - Patching upstream sources during packaging
 - Raising `upstreamVersion` without moving the license and notice statements with it
+- Updating the development pin partially: `upstream.development.version`,
+  `upstream.development.url`, and `upstream.development.sha256` move together
+- Changing project versions on develop or feature branches instead of using the repository's release flow
 - Changes that contradict the project's architecture or philosophy
 - Large refactors without prior discussion
 
