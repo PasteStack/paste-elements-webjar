@@ -27,13 +27,22 @@ variables:
     - if: '$CI_COMMIT_TAG'
     - if: '$CI_COMMIT_BRANCH'
 
+.upstream-mode:
+  script:
+    - |
+      if [ -n "${CI_COMMIT_TAG:-}" ]; then
+        export UPSTREAM_MAVEN_ARGS=""
+      else
+        export UPSTREAM_MAVEN_ARGS="-Pdevelopment-upstream"
+      fi
+
 # A WebJar's own version must equal the upstream version it wraps, and both must
 # equal the VERSION file. Read through Maven so a future <parent> block cannot
 # make a text scan validate the wrong element.
 .verify-versions:
   script:
-    - version="$(mvn $MAVEN_CLI_OPTS -q ${MAVEN_HELP_PLUGIN}:evaluate -Dexpression=project.version -DforceStdout)"
-    - upstream="$(mvn $MAVEN_CLI_OPTS -q ${MAVEN_HELP_PLUGIN}:evaluate -Dexpression=upstreamVersion -DforceStdout)"
+    - version="$(mvn $MAVEN_CLI_OPTS $UPSTREAM_MAVEN_ARGS -q ${MAVEN_HELP_PLUGIN}:evaluate -Dexpression=project.version -DforceStdout)"
+    - upstream="$(mvn $MAVEN_CLI_OPTS $UPSTREAM_MAVEN_ARGS -q ${MAVEN_HELP_PLUGIN}:evaluate -Dexpression=upstreamVersion -DforceStdout)"
     - declared="$(tr -d '[:space:]' < VERSION)"
     - test "$version" = "$declared" || { echo "pom version $version != VERSION $declared" >&2; exit 1; }
     - test "$upstream" = "$declared" || { echo "upstreamVersion $upstream != VERSION $declared" >&2; exit 1; }
@@ -52,10 +61,11 @@ compile:
     # The pom unzips the downloaded upstream archive with the system unzip.
     - apk add --no-cache unzip
   script:
+    - !reference [.upstream-mode, script]
     - !reference [.verify-versions, script]
-    - mvn $MAVEN_CLI_OPTS clean package
+    - mvn $MAVEN_CLI_OPTS $UPSTREAM_MAVEN_ARGS clean package
   artifacts:
-    paths: [target/*.jar]
+    paths: [target/*.jar, target/upstream-development.tar.gz, target/published-pom.xml]
     expire_in: 1 day
 
 test:
@@ -69,7 +79,9 @@ test:
   script:
     # A WebJar with no resources under its own WebJar prefix is an empty jar that
     # resolves and serves nothing.
-    - artifact="$(mvn $MAVEN_CLI_OPTS -q ${MAVEN_HELP_PLUGIN}:evaluate -Dexpression=project.artifactId -DforceStdout)"
+    - !reference [.upstream-mode, script]
+    - artifact="$(mvn $MAVEN_CLI_OPTS $UPSTREAM_MAVEN_ARGS -q ${MAVEN_HELP_PLUGIN}:evaluate -Dexpression=project.artifactId -DforceStdout)"
+    - version="$(mvn $MAVEN_CLI_OPTS $UPSTREAM_MAVEN_ARGS -q ${MAVEN_HELP_PLUGIN}:evaluate -Dexpression=project.version -DforceStdout)"
     - |
       for jar in target/*.jar; do
         test -s "$jar" || { echo "empty artifact: $jar" >&2; exit 1; }
@@ -79,6 +91,23 @@ test:
         # must travel with them.
         unzip -l "$jar" | grep "META-INF/resources/webjars/${artifact}/[^ ]*LICENSE" >/dev/null \
           || { echo "no upstream LICENSE in $jar" >&2; exit 1; }
+        if [ -z "${CI_COMMIT_TAG:-}" ]; then
+          expected="$(mvn $MAVEN_CLI_OPTS $UPSTREAM_MAVEN_ARGS -q ${MAVEN_HELP_PLUGIN}:evaluate -Dexpression=upstream.development.sha256 -DforceStdout)"
+          revision="$(mvn $MAVEN_CLI_OPTS $UPSTREAM_MAVEN_ARGS -q ${MAVEN_HELP_PLUGIN}:evaluate -Dexpression=upstream.development.version -DforceStdout)"
+          printf '%s  %s\n' "$expected" target/upstream-development.tar.gz | sha256sum -c -
+          mkdir -p target/verify-upstream target/verify-webjar
+          tar -xzf target/upstream-development.tar.gz -C target/verify-upstream
+          unzip -q -o "$jar" -d target/verify-webjar
+          packaged="target/verify-webjar/META-INF/resources/webjars/${artifact}/${version}"
+          diff -r target/verify-upstream "$packaged"
+          test -s "$packaged/modules/marquee/marquee.js"
+          test -s "$packaged/modules/marquee/marquee.scss"
+          cmp target/verify-upstream/LICENSE "$packaged/LICENSE"
+          cmp target/verify-upstream/NOTICE.md "$packaged/NOTICE.md"
+          grep -Fx "version=$revision" target/verify-webjar/META-INF/paste-upstream.properties
+          grep -Fx "sha256=$expected" target/verify-webjar/META-INF/paste-upstream.properties
+          grep -F 'Apache License, Version 2.0' target/published-pom.xml
+        fi
       done
 
 publish:
@@ -90,6 +119,7 @@ publish:
     - apk add --no-cache unzip
     - !reference [.before-artifact-tags, before_script]
   script:
+    - !reference [.upstream-mode, script]
     - !reference [.verify-versions, script]
     - export GL_USERNAME=gitlab-ci-token GL_PASSWORD="${CI_JOB_TOKEN}"
     # Branch pipelines must never take the release coordinates: they publish the
@@ -97,13 +127,13 @@ publish:
     # Only a tag pipeline deploys the clean VERSION coordinates.
     - |
       if [ -n "${CICD_PUBLISH_PINNABLE_TAG}" ]; then
-        mvn $MAVEN_CLI_OPTS ${MAVEN_VERSIONS_PLUGIN}:set -DnewVersion="$(tr -d '[:space:]' < VERSION)-${CICD_PUBLISH_PINNABLE_TAG}" -DgenerateBackupPoms=false
+        mvn $MAVEN_CLI_OPTS $UPSTREAM_MAVEN_ARGS ${MAVEN_VERSIONS_PLUGIN}:set -DnewVersion="$(tr -d '[:space:]' < VERSION)-${CICD_PUBLISH_PINNABLE_TAG}" -DgenerateBackupPoms=false
       fi
-    - mvn $MAVEN_CLI_OPTS deploy
+    - mvn $MAVEN_CLI_OPTS $UPSTREAM_MAVEN_ARGS deploy
     # The rolling version string repeats on every pipeline for the same branch, so
     # the target registry must accept duplicate Maven uploads (GitLab's default).
     - |
       if [ "${CICD_PUBLISH_ROLLING}" = "true" ]; then
-        mvn $MAVEN_CLI_OPTS ${MAVEN_VERSIONS_PLUGIN}:set -DnewVersion="$(tr -d '[:space:]' < VERSION)-${CICD_PUBLISH_ROLLING_TAG}" -DgenerateBackupPoms=false
-        mvn $MAVEN_CLI_OPTS deploy
+        mvn $MAVEN_CLI_OPTS $UPSTREAM_MAVEN_ARGS ${MAVEN_VERSIONS_PLUGIN}:set -DnewVersion="$(tr -d '[:space:]' < VERSION)-${CICD_PUBLISH_ROLLING_TAG}" -DgenerateBackupPoms=false
+        mvn $MAVEN_CLI_OPTS $UPSTREAM_MAVEN_ARGS deploy
       fi
