@@ -5,7 +5,7 @@
     <packaging>jar</packaging>
     <groupId>com.pastestack</groupId>
     <artifactId>paste-elements-webjar</artifactId>
-    <version>0.2.0</version>
+    <version>0.3.0</version>
     <name>paste-elements-webjar</name>
     <description>WebJar for PasteStack Elements UI components (JS + SCSS)</description>
     <url>https://github.com/PasteStack/paste-elements</url>
@@ -27,10 +27,15 @@
         </snapshotRepository>
     </distributionManagement>
 
+    <!-- The jar contains only the packaged upstream, so this names that tree's
+         license: the release build wraps the MIT-licensed release tag, while the
+         development-upstream profile wraps the Apache-2.0-licensed development
+         archive. The profile overrides these properties and the flattened
+         published POM records the effective value. -->
     <licenses>
         <license>
-            <name>MIT License</name>
-            <url>https://raw.githubusercontent.com/PasteStack/paste-elements/main/LICENSE</url>
+            <name>${upstream.license.name}</name>
+            <url>${upstream.license.url}</url>
             <distribution>repo</distribution>
         </license>
     </licenses>
@@ -51,10 +56,13 @@
 
     <properties>
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
-        <upstreamVersion>0.2.0</upstreamVersion>
+        <upstreamVersion>0.3.0</upstreamVersion>
         <upstream.url>https://github.com/PasteStack/paste-elements</upstream.url>
+        <upstream.release.skip>false</upstream.release.skip>
+        <upstream.license.name>MIT License</upstream.license.name>
+        <upstream.license.url>https://opensource.org/license/mit</upstream.license.url>
         <extractDir>${project.build.directory}/paste-elements-${upstreamVersion}</extractDir>
-        <destDir>${project.build.outputDirectory}/META-INF/resources/webjars/${project.artifactId}/${upstreamVersion}</destDir>
+        <destDir>${project.build.outputDirectory}/META-INF/resources/webjars/${project.artifactId}/${project.version}</destDir>
     </properties>
 
     <build>
@@ -74,6 +82,7 @@
                             <url>${upstream.url}/archive</url>
                             <fromFile>v${upstreamVersion}.zip</fromFile>
                             <toDir>${project.build.directory}</toDir>
+                            <skip>${upstream.release.skip}</skip>
                         </configuration>
                     </execution>
                 </executions>
@@ -84,12 +93,15 @@
                 <version>1.7</version>
                 <executions>
                     <execution>
+                        <id>package-upstream</id>
                         <phase>process-resources</phase>
                         <goals>
                             <goal>run</goal>
                         </goals>
                         <configuration>
                             <target>
+                                <delete dir="${project.build.outputDirectory}/META-INF/resources/webjars/${project.artifactId}" />
+                                <delete file="${project.build.outputDirectory}/META-INF/paste-upstream.properties" />
                                 <echo message="unzip archive" />
                                 <exec executable="unzip">
                                     <arg line="-o ${project.build.directory}/v${upstreamVersion}.zip -d ${project.build.directory}" />
@@ -107,4 +119,77 @@
             </plugin>
         </plugins>
     </build>
+
+    <profiles>
+        <profile>
+            <id>development-upstream</id>
+            <properties>
+                <upstream.release.skip>true</upstream.release.skip>
+                <upstream.development.version>develop-272c93f1</upstream.development.version>
+                <upstream.development.sha256>2b4321d6a72090f98ac034813036bea25e1f619ad5bab0adc09ceb85fe1873c6</upstream.development.sha256>
+                <upstream.development.url>https://gitlab.com/api/v4/projects/76219410/packages/generic/paste-elements/develop-272c93f1/paste-elements-develop-272c93f1.tar.gz</upstream.development.url>
+                <upstream.license.name>Apache License, Version 2.0</upstream.license.name>
+                <upstream.license.url>https://www.apache.org/licenses/LICENSE-2.0</upstream.license.url>
+            </properties>
+            <build>
+                <plugins>
+                    <plugin>
+                        <artifactId>maven-antrun-plugin</artifactId>
+                        <executions>
+                            <execution>
+                                <id>package-upstream</id>
+                                <configuration combine.self="override">
+                                    <target>
+                                        <mkdir dir="${project.build.directory}" />
+                                        <get src="${upstream.development.url}" dest="${project.build.directory}/upstream-development.tar.gz" />
+                                        <checksum file="${project.build.directory}/upstream-development.tar.gz" algorithm="SHA-256" property="${upstream.development.sha256}" verifyproperty="upstream.checksum.valid" />
+                                        <fail message="Upstream development archive checksum mismatch">
+                                            <condition><not><equals arg1="${upstream.checksum.valid}" arg2="true" /></not></condition>
+                                        </fail>
+                                        <delete dir="${project.build.directory}/upstream-development" />
+                                        <mkdir dir="${project.build.directory}/upstream-development" />
+                                        <untar src="${project.build.directory}/upstream-development.tar.gz" dest="${project.build.directory}/upstream-development" compression="gzip" />
+                                        <loadfile property="upstream.archive.version" srcFile="${project.build.directory}/upstream-development/VERSION">
+                                            <filterchain><striplinebreaks /></filterchain>
+                                        </loadfile>
+                                        <fail message="Upstream development VERSION does not match upstreamVersion">
+                                            <condition><not><equals arg1="${upstream.archive.version}" arg2="${upstreamVersion}" /></not></condition>
+                                        </fail>
+                                        <delete dir="${project.build.outputDirectory}/META-INF/resources/webjars/${project.artifactId}" />
+                                        <copy todir="${destDir}"><fileset dir="${project.build.directory}/upstream-development" /></copy>
+                                        <mkdir dir="${project.build.outputDirectory}/META-INF" />
+                                        <echo file="${project.build.outputDirectory}/META-INF/paste-upstream.properties">package=paste-elements
+version=${upstream.development.version}
+sha256=${upstream.development.sha256}
+url=${upstream.development.url}
+</echo>
+                                    </target>
+                                </configuration>
+                            </execution>
+                        </executions>
+                    </plugin>
+                    <plugin>
+                        <groupId>org.codehaus.mojo</groupId>
+                        <artifactId>flatten-maven-plugin</artifactId>
+                        <version>1.6.0</version>
+                        <configuration>
+                            <flattenMode>oss</flattenMode>
+                            <updatePomFile>true</updatePomFile>
+                            <outputDirectory>${project.build.directory}</outputDirectory>
+                            <flattenedPomFilename>published-pom.xml</flattenedPomFilename>
+                        </configuration>
+                        <executions>
+                            <execution>
+                                <id>flatten-publication</id>
+                                <phase>process-resources</phase>
+                                <goals>
+                                    <goal>flatten</goal>
+                                </goals>
+                            </execution>
+                        </executions>
+                    </plugin>
+                </plugins>
+            </build>
+        </profile>
+    </profiles>
 </project>
