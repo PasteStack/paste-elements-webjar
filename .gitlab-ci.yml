@@ -1,53 +1,139 @@
-# Copyright (c) 2024–2026 Tomshley
-#
-# Licensed under the Apache License, Version 2.0
-
 include:
   - project: 'tomshley/brands/global/tware/tech/products/provisioning/cicd-pipelines'
-    ref: 'v0.4.20'
-    file:
-      - '/gitlab/ci/.stages-base.yml'
-      - '/gitlab/ci/.gitflow-base.yml'
-      - '/gitlab/ci/.gitflow-branch-policy.yml'
-      - '/gitlab/ci/.gitflow-jobs.yml'
-      - '/gitlab/ci/.artifact-tags.yml'
-      - '/gitlab/ci/.artifact-publish-policy.yml'
-      - '/gitlab/ci/.security-scanning.yml'
-      - '/gitlab/ci/.sbt-runtime.yml'
+    ref: 'v0.9.1'
+    file: '/adapters/gitlab/ci/adapter.yml'
 
 variables:
-  CICD_PIPELINES_RUNNER_TAG: "0.4.20"
+  CICD_PIPELINES_RUNNER_TAG: "0.9.1"
+  BASE_CONTAINERS_REGISTRY: registry.gitlab.com/tomshley/brands/global/tware/tech/products/provisioning/base-containers
+  BASE_CONTAINERS_UPSTREAM_TAG: "0.6.0"
+  # Maven is the toolchain here and no house runner image carries it, so these
+  # jobs pin a public Maven image and stay off the toolbox scripts, which only
+  # exist inside the house images.
+  MAVEN_IMAGE: maven:3.9.9-eclipse-temurin-21-alpine
+  MAVEN_CLI_OPTS: "-B -s settings.xml"
+  # Plugins invoked from the command line are pinned; an unpinned goal resolves
+  # whatever release Central serves that day.
+  MAVEN_HELP_PLUGIN: "org.apache.maven.plugins:maven-help-plugin:3.5.1"
+  MAVEN_VERSIONS_PLUGIN: "org.codehaus.mojo:versions-maven-plugin:2.17.1"
 
-# ── Build ─────────────────────────────────────────────────────────────────
-
-compile:
-  extends:
-    - .tomshley-sbt-runtime
-    - .policy-runs-on-any-branch
-  stage: build
-  script:
-    - apk add --no-cache maven
-    - mvn clean package -s settings.xml
-  artifacts:
-    paths:
-      - target/*.jar
-
-# ── Deploy (gitflow-governed) ─────────────────────────────────────────────
-
-deploy:
-  extends:
-    - .tomshley-sbt-runtime
-    - .flow-artifact-publish
-  stage: deploy
+# Branch and tag pipelines carry the build; merge request pipelines would only
+# duplicate them (the adapter's workflow admits both), so they are skipped here.
+# Tag pipelines must keep these jobs: the publish job declares `needs` on them.
+.runs-on-branch-or-tag:
   rules:
-    - if: '$TOMSHLEY_CICD_FLOW_TYPE == "tag"'
-      when: manual
+    - if: '$CI_PIPELINE_SOURCE == "merge_request_event"'
+      when: never
+    - if: '$CI_COMMIT_TAG'
+    - if: '$CI_COMMIT_BRANCH'
+
+.upstream-mode:
   script:
     - |
-      if [ -f ".secure_files/.env" ]; then
-        set -a
-        . .secure_files/.env
-        set +a
+      if [ -n "${CI_COMMIT_TAG:-}" ]; then
+        export UPSTREAM_MAVEN_ARGS=""
+      else
+        export UPSTREAM_MAVEN_ARGS="-Pdevelopment-upstream"
       fi
-    - apk add --no-cache maven
-    - mvn deploy -s settings.xml
+
+# A WebJar's own version must equal the upstream version it wraps, and both must
+# equal the VERSION file. Read through Maven so a future <parent> block cannot
+# make a text scan validate the wrong element.
+.verify-versions:
+  script:
+    - version="$(mvn $MAVEN_CLI_OPTS $UPSTREAM_MAVEN_ARGS -q ${MAVEN_HELP_PLUGIN}:evaluate -Dexpression=project.version -DforceStdout)"
+    - upstream="$(mvn $MAVEN_CLI_OPTS $UPSTREAM_MAVEN_ARGS -q ${MAVEN_HELP_PLUGIN}:evaluate -Dexpression=upstreamVersion -DforceStdout)"
+    - declared="$(tr -d '[:space:]' < VERSION)"
+    - test "$version" = "$declared" || { echo "pom version $version != VERSION $declared" >&2; exit 1; }
+    - test "$upstream" = "$declared" || { echo "upstreamVersion $upstream != VERSION $declared" >&2; exit 1; }
+    - |
+      if [ -n "${CI_COMMIT_TAG:-}" ] && [ "${CI_COMMIT_TAG#v}" != "$declared" ]; then
+        echo "tag ${CI_COMMIT_TAG} does not match VERSION ${declared}" >&2
+        exit 1
+      fi
+
+compile:
+  extends: [.runs-on-branch-or-tag]
+  image: ${MAVEN_IMAGE}
+  stage: build
+  tags: [saas-linux-small-amd64]
+  before_script:
+    # The pom unzips the downloaded upstream archive with the system unzip.
+    - apk add --no-cache unzip
+  script:
+    - !reference [.upstream-mode, script]
+    - !reference [.verify-versions, script]
+    - mvn $MAVEN_CLI_OPTS $UPSTREAM_MAVEN_ARGS clean package
+  artifacts:
+    paths: [target/*.jar, target/upstream-development.tar.gz, target/published-pom.xml]
+    expire_in: 1 day
+
+test:
+  extends: [.runs-on-branch-or-tag]
+  image: ${MAVEN_IMAGE}
+  stage: test
+  tags: [saas-linux-small-amd64]
+  needs: [compile]
+  before_script:
+    - apk add --no-cache unzip
+  script:
+    # A WebJar with no resources under its own WebJar prefix is an empty jar that
+    # resolves and serves nothing.
+    - !reference [.upstream-mode, script]
+    - artifact="$(mvn $MAVEN_CLI_OPTS $UPSTREAM_MAVEN_ARGS -q ${MAVEN_HELP_PLUGIN}:evaluate -Dexpression=project.artifactId -DforceStdout)"
+    - version="$(mvn $MAVEN_CLI_OPTS $UPSTREAM_MAVEN_ARGS -q ${MAVEN_HELP_PLUGIN}:evaluate -Dexpression=project.version -DforceStdout)"
+    - |
+      for jar in target/*.jar; do
+        test -s "$jar" || { echo "empty artifact: $jar" >&2; exit 1; }
+        unzip -l "$jar" | grep "META-INF/resources/webjars/${artifact}/" >/dev/null \
+          || { echo "no webjar resources for ${artifact} in $jar" >&2; exit 1; }
+        # The jar redistributes upstream's sources, so upstream's license text
+        # must travel with them.
+        unzip -l "$jar" | grep "META-INF/resources/webjars/${artifact}/[^ ]*LICENSE" >/dev/null \
+          || { echo "no upstream LICENSE in $jar" >&2; exit 1; }
+        if [ -z "${CI_COMMIT_TAG:-}" ]; then
+          expected="$(mvn $MAVEN_CLI_OPTS $UPSTREAM_MAVEN_ARGS -q ${MAVEN_HELP_PLUGIN}:evaluate -Dexpression=upstream.development.sha256 -DforceStdout)"
+          revision="$(mvn $MAVEN_CLI_OPTS $UPSTREAM_MAVEN_ARGS -q ${MAVEN_HELP_PLUGIN}:evaluate -Dexpression=upstream.development.version -DforceStdout)"
+          printf '%s  %s\n' "$expected" target/upstream-development.tar.gz | sha256sum -c -
+          mkdir -p target/verify-upstream target/verify-webjar
+          tar -xzf target/upstream-development.tar.gz -C target/verify-upstream
+          unzip -q -o "$jar" -d target/verify-webjar
+          packaged="target/verify-webjar/META-INF/resources/webjars/${artifact}/${version}"
+          diff -r target/verify-upstream "$packaged"
+          test -s "$packaged/modules/marquee/marquee.js"
+          test -s "$packaged/modules/marquee/marquee.scss"
+          cmp target/verify-upstream/LICENSE "$packaged/LICENSE"
+          cmp target/verify-upstream/NOTICE.md "$packaged/NOTICE.md"
+          grep -Fx "version=$revision" target/verify-webjar/META-INF/paste-upstream.properties
+          grep -Fx "sha256=$expected" target/verify-webjar/META-INF/paste-upstream.properties
+          grep -F 'Apache License, Version 2.0' target/published-pom.xml
+        fi
+      done
+
+publish:
+  extends: [.before-artifact-tags, .flow-artifact-publish]
+  image: ${MAVEN_IMAGE}
+  tags: [saas-linux-small-amd64]
+  needs: [compile, test]
+  before_script:
+    - apk add --no-cache unzip
+    - !reference [.before-artifact-tags, before_script]
+  script:
+    - !reference [.upstream-mode, script]
+    - !reference [.verify-versions, script]
+    - export GL_USERNAME=gitlab-ci-token GL_PASSWORD="${CI_JOB_TOKEN}"
+    # Branch pipelines must never take the release coordinates: they publish the
+    # pinnable {ref-slug}-{sha} version, then the rolling {ref-slug}-latest one.
+    # Only a tag pipeline deploys the clean VERSION coordinates.
+    - |
+      if [ -n "${CICD_PUBLISH_PINNABLE_TAG}" ]; then
+        mvn $MAVEN_CLI_OPTS $UPSTREAM_MAVEN_ARGS ${MAVEN_VERSIONS_PLUGIN}:set -DnewVersion="$(tr -d '[:space:]' < VERSION)-${CICD_PUBLISH_PINNABLE_TAG}" -DgenerateBackupPoms=false
+      fi
+    - mvn $MAVEN_CLI_OPTS $UPSTREAM_MAVEN_ARGS deploy
+    # The rolling version string repeats on every pipeline for the same branch, so
+    # the target registry must accept duplicate Maven uploads (GitLab's default).
+    - |
+      if [ "${CICD_PUBLISH_ROLLING}" = "true" ]; then
+        mvn $MAVEN_CLI_OPTS $UPSTREAM_MAVEN_ARGS ${MAVEN_VERSIONS_PLUGIN}:set -DnewVersion="$(tr -d '[:space:]' < VERSION)-${CICD_PUBLISH_ROLLING_TAG}" -DgenerateBackupPoms=false
+        mvn $MAVEN_CLI_OPTS $UPSTREAM_MAVEN_ARGS deploy
+      fi
