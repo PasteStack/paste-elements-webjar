@@ -5,7 +5,7 @@
     <packaging>jar</packaging>
     <groupId>com.pastestack</groupId>
     <artifactId>paste-elements-webjar</artifactId>
-    <version>0.2.0</version>
+    <version>0.3.0</version>
     <name>paste-elements-webjar</name>
     <description>WebJar for PasteStack Elements UI components (JS + SCSS)</description>
     <url>https://github.com/PasteStack/paste-elements</url>
@@ -56,7 +56,7 @@
 
     <properties>
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
-        <upstreamVersion>0.2.0</upstreamVersion>
+        <upstreamVersion>0.3.0</upstreamVersion>
         <upstream.url>https://github.com/PasteStack/paste-elements</upstream.url>
         <upstream.release.skip>false</upstream.release.skip>
         <upstream.license.name>MIT License</upstream.license.name>
