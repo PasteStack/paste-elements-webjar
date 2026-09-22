@@ -1,4 +1,6 @@
-# Unreleased
+# paste-elements-webjar v0.3.0
+
+**Date:** 2026-09-22
 
 ## Fixed
 
