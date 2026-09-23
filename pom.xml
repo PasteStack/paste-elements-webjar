@@ -5,7 +5,7 @@
     <packaging>jar</packaging>
     <groupId>com.pastestack</groupId>
     <artifactId>paste-elements-webjar</artifactId>
-    <version>0.3.0</version>
+    <version>0.4.0</version>
     <name>paste-elements-webjar</name>
     <description>WebJar for PasteStack Elements UI components (JS + SCSS)</description>
     <url>https://github.com/PasteStack/paste-elements</url>
@@ -28,10 +28,10 @@
     </distributionManagement>
 
     <!-- The jar contains only the packaged upstream, so this names that tree's
-         license: the release build wraps the MIT-licensed release tag, while the
-         development-upstream profile wraps the Apache-2.0-licensed development
-         archive. The profile overrides these properties and the flattened
-         published POM records the effective value. -->
+         license: the release build wraps the Apache-2.0-licensed release tag, and
+         the development-upstream profile wraps an Apache-2.0-licensed
+         development archive. The profile overrides these properties and the
+         flattened published POM records the effective value. -->
     <licenses>
         <license>
             <name>${upstream.license.name}</name>
@@ -56,11 +56,11 @@
 
     <properties>
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
-        <upstreamVersion>0.3.0</upstreamVersion>
+        <upstreamVersion>0.4.0</upstreamVersion>
         <upstream.url>https://github.com/PasteStack/paste-elements</upstream.url>
         <upstream.release.skip>false</upstream.release.skip>
-        <upstream.license.name>MIT License</upstream.license.name>
-        <upstream.license.url>https://opensource.org/license/mit</upstream.license.url>
+        <upstream.license.name>Apache License, Version 2.0</upstream.license.name>
+        <upstream.license.url>https://www.apache.org/licenses/LICENSE-2.0</upstream.license.url>
         <extractDir>${project.build.directory}/paste-elements-${upstreamVersion}</extractDir>
         <destDir>${project.build.outputDirectory}/META-INF/resources/webjars/${project.artifactId}/${project.version}</destDir>
     </properties>

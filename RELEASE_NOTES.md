@@ -1,3 +1,19 @@
+# paste-elements-webjar v0.4.0
+
+**Date:** 2026-09-23
+
+## Changed
+
+- Packages `paste-elements` 0.4.0, which adds the `paste.ui.form` and
+  `paste.ui.io-reply-fragment-envelope` Elements.
+
+## Fixed
+
+- The published POM declares the Apache License, Version 2.0, the license of
+  the packaged upstream. The 0.3.0 POM declared MIT, but upstream
+  `paste-elements` 0.3.0 was already Apache-2.0 licensed; the `LICENSE` inside
+  that jar is the correct one.
+
 # paste-elements-webjar v0.3.0
 
 **Date:** 2026-09-22
