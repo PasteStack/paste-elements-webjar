@@ -23,7 +23,7 @@ the pin it was built from in `META-INF/paste-upstream.properties`.
 <dependency>
   <groupId>com.pastestack</groupId>
   <artifactId>paste-elements-webjar</artifactId>
-  <version>0.3.0</version>
+  <version>0.4.0</version>
 </dependency>
 ```
 
@@ -31,7 +31,7 @@ the pin it was built from in `META-INF/paste-upstream.properties`.
 // build.sbt
 resolvers += "paste-registry" at "https://gitlab.com/api/v4/projects/70289607/packages/maven"
 
-libraryDependencies += "com.pastestack" % "paste-elements-webjar" % "0.3.0"
+libraryDependencies += "com.pastestack" % "paste-elements-webjar" % "0.4.0"
 ```
 
 ## Contents
@@ -39,10 +39,10 @@ libraryDependencies += "com.pastestack" % "paste-elements-webjar" % "0.3.0"
 The jar carries the upstream tree as published, not a repackaged `src/` layout:
 
 ```
-/webjars/paste-elements-webjar/0.3.0/base/*.scss          Variables, reset, base styles
-/webjars/paste-elements-webjar/0.3.0/modules/*/*.js        Element behaviour
-/webjars/paste-elements-webjar/0.3.0/modules/*/*.scss      Element styles
-/webjars/paste-elements-webjar/0.3.0/structure/*           Grid, layout, spacing, typography
+/webjars/paste-elements-webjar/0.4.0/base/*.scss          Variables, reset, base styles
+/webjars/paste-elements-webjar/0.4.0/modules/*/*.js        Element behaviour
+/webjars/paste-elements-webjar/0.4.0/modules/*/*.scss      Element styles
+/webjars/paste-elements-webjar/0.4.0/structure/*           Grid, layout, spacing, typography
 ```
 
 ## Versioning
@@ -83,7 +83,7 @@ mvn --settings ./settings.xml deploy
 This repository's build files: Apache License, Version 2.0 (`LICENSE`, `NOTICE.md`).
 
 The published jar contains only the packaged upstream tree, so its terms are that
-tree's — MIT for the `paste-elements` 0.3.0 release tag, and Apache-2.0 for the
+tree's — Apache-2.0 for the `paste-elements` 0.4.0 release tag and for the
 development archives branch builds wrap. The `pom.xml` license properties and the
 flattened published POM reflect whichever upstream the jar was built from. The
 upstream `LICENSE` travels inside the jar.
