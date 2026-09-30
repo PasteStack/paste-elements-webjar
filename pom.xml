@@ -125,9 +125,9 @@
             <id>development-upstream</id>
             <properties>
                 <upstream.release.skip>true</upstream.release.skip>
-                <upstream.development.version>develop-272c93f1</upstream.development.version>
-                <upstream.development.sha256>2b4321d6a72090f98ac034813036bea25e1f619ad5bab0adc09ceb85fe1873c6</upstream.development.sha256>
-                <upstream.development.url>https://gitlab.com/api/v4/projects/76219410/packages/generic/paste-elements/develop-272c93f1/paste-elements-develop-272c93f1.tar.gz</upstream.development.url>
+                <upstream.development.version>develop-fed607d7</upstream.development.version>
+                <upstream.development.sha256>638e62bf21d63e8a43eaacb80529e6adeaa90d376e8216d3079cade03ebb89f5</upstream.development.sha256>
+                <upstream.development.url>https://gitlab.com/api/v4/projects/76219410/packages/generic/paste-elements/develop-fed607d7/paste-elements-develop-fed607d7.tar.gz</upstream.development.url>
                 <upstream.license.name>Apache License, Version 2.0</upstream.license.name>
                 <upstream.license.url>https://www.apache.org/licenses/LICENSE-2.0</upstream.license.url>
             </properties>
