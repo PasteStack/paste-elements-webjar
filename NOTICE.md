@@ -33,7 +33,7 @@ License 2.0.
 The published jar repackages the `paste-elements` sources of the upstream version
 named by the `upstreamVersion` property in `pom.xml`, and carries no sources of its
 own beyond the build. The packaged version decides the jar's terms: upstream
-`paste-elements` 0.4.0 is licensed under the Apache License, Version 2.0, which
+`paste-elements` 0.5.0 is licensed under the Apache License, Version 2.0, which
 is what `pom.xml` declares. Upstream releases up to 0.2.0 were MIT-licensed.
 
 ## Third-Party Notices
