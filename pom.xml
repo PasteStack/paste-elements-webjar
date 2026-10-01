@@ -56,7 +56,7 @@
 
     <properties>
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
-        <upstreamVersion>0.4.0</upstreamVersion>
+        <upstreamVersion>0.5.0</upstreamVersion>
         <upstream.url>https://github.com/PasteStack/paste-elements</upstream.url>
         <upstream.release.skip>false</upstream.release.skip>
         <upstream.license.name>Apache License, Version 2.0</upstream.license.name>
@@ -125,9 +125,9 @@
             <id>development-upstream</id>
             <properties>
                 <upstream.release.skip>true</upstream.release.skip>
-                <upstream.development.version>develop-fed607d7</upstream.development.version>
-                <upstream.development.sha256>638e62bf21d63e8a43eaacb80529e6adeaa90d376e8216d3079cade03ebb89f5</upstream.development.sha256>
-                <upstream.development.url>https://gitlab.com/api/v4/projects/76219410/packages/generic/paste-elements/develop-fed607d7/paste-elements-develop-fed607d7.tar.gz</upstream.development.url>
+                <upstream.development.version>develop-55ab0493</upstream.development.version>
+                <upstream.development.sha256>8c165d6f1e6bc81d9ca8035953a9db34895a0b364e49dc14c47c1f662d830023</upstream.development.sha256>
+                <upstream.development.url>https://gitlab.com/api/v4/projects/76219410/packages/generic/paste-elements/develop-55ab0493/paste-elements-develop-55ab0493.tar.gz</upstream.development.url>
                 <upstream.license.name>Apache License, Version 2.0</upstream.license.name>
                 <upstream.license.url>https://www.apache.org/licenses/LICENSE-2.0</upstream.license.url>
             </properties>

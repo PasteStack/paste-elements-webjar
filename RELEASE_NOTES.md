@@ -1,3 +1,18 @@
+# paste-elements-webjar v0.5.0
+
+**Date:** 2026-09-30
+
+## Changed
+
+- Packages `paste-elements` 0.5.0, which hardens `paste.ui.form`
+  interception with a `data-paste-form-timeout` request deadline, a
+  cancelable `paste.ui.form:failed` event carrying the failure reason,
+  and native resubmission only where a replay cannot duplicate the
+  submission.
+- The development-upstream profile names the `develop-55ab0493` archive
+  built from the 0.5.0 release merge, keeping non-tag builds on content
+  whose VERSION matches `upstreamVersion`.
+
 # paste-elements-webjar v0.4.0
 
 **Date:** 2026-09-23
