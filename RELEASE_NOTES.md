@@ -1,3 +1,17 @@
+# paste-elements-webjar v0.6.0
+
+**Date:** 2026-10-22
+
+## Changed
+
+- Packages `paste-elements` 0.6.0: shared timing and media helpers moved
+  under `modules/utilities/`, lifecycle and style-ownership hardening
+  across the elements, and the new `imagesequence`,
+  `progressiveresolution` and `scrollscrub` modules.
+- The development-upstream profile names the published
+  `paste-elements-0.6.0` source archive, keeping non-tag builds on
+  content whose VERSION matches `upstreamVersion`.
+
 # paste-elements-webjar v0.5.0
 
 **Date:** 2026-09-30
