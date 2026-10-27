@@ -1,3 +1,18 @@
+# paste-elements-webjar v0.7.0
+
+**Date:** 2026-10-26
+
+## Changed
+
+- Packages `paste-elements` 0.7.0: the form family split by
+  responsibility (`form_validity`, `form_apply`, `form_html`,
+  `form_autosave`), the shared `io-html-fragment` transport,
+  `fragment_navigation`, the restored `lazy_loader`, Carousel and the
+  other restored elements, and element-declared request deadlines.
+- The development-upstream profile names the published
+  `paste-elements-0.7.0` source archive, keeping non-tag builds on
+  content whose VERSION matches `upstreamVersion`.
+
 # paste-elements-webjar v0.6.0
 
 **Date:** 2026-10-22
