@@ -5,7 +5,7 @@
     <packaging>jar</packaging>
     <groupId>com.pastestack</groupId>
     <artifactId>paste-elements-webjar</artifactId>
-    <version>0.6.0</version>
+    <version>0.7.0</version>
     <name>paste-elements-webjar</name>
     <description>WebJar for PasteStack Elements UI components (JS + SCSS)</description>
     <url>https://github.com/PasteStack/paste-elements</url>
@@ -56,7 +56,7 @@
 
     <properties>
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
-        <upstreamVersion>0.6.0</upstreamVersion>
+        <upstreamVersion>0.7.0</upstreamVersion>
         <upstream.url>https://github.com/PasteStack/paste-elements</upstream.url>
         <upstream.release.skip>false</upstream.release.skip>
         <upstream.license.name>Apache License, Version 2.0</upstream.license.name>
@@ -125,9 +125,9 @@
             <id>development-upstream</id>
             <properties>
                 <upstream.release.skip>true</upstream.release.skip>
-                <upstream.development.version>0.6.0</upstream.development.version>
-                <upstream.development.sha256>40de3c1e1cbf09176dc156828303abc9ac5e4437f5722a991113b00e514bf288</upstream.development.sha256>
-                <upstream.development.url>https://gitlab.com/api/v4/projects/76219410/packages/generic/paste-elements/0.6.0/paste-elements-0.6.0.tar.gz</upstream.development.url>
+                <upstream.development.version>0.7.0</upstream.development.version>
+                <upstream.development.sha256>4b5d31fd7483d6771513df2fd649d3388b26365bd105dd6280c59b386e2a5524</upstream.development.sha256>
+                <upstream.development.url>https://gitlab.com/api/v4/projects/76219410/packages/generic/paste-elements/0.7.0/paste-elements-0.7.0.tar.gz</upstream.development.url>
                 <upstream.license.name>Apache License, Version 2.0</upstream.license.name>
                 <upstream.license.url>https://www.apache.org/licenses/LICENSE-2.0</upstream.license.url>
             </properties>
