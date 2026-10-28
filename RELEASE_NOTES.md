@@ -1,3 +1,13 @@
+# paste-elements-webjar v0.7.1
+
+**Date:** 2026-10-28
+
+## Changed
+
+- Apache License 2.0 applied consistently: verbatim LICENSE text, NOTICE rename, Apache short header in every first-party source file, corrected license metadata.
+
+---
+
 # paste-elements-webjar v0.7.0
 
 **Date:** 2026-10-26
@@ -77,7 +87,7 @@
 ## Licensing
 
 - This repository's own build files are licensed under the Apache License,
-  Version 2.0 (`LICENSE`, `NOTICE.md`).
+  Version 2.0 (`LICENSE`, `NOTICE`).
 - The pom's `<licenses>` now describes what the jar actually contains — the packaged
   `upstreamVersion` — instead of this repository. It moves to Apache-2.0 in the same
   change that raises `upstreamVersion` to the first relicensed `paste-elements`
