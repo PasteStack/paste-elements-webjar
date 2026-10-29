@@ -71,7 +71,7 @@
 
     <properties>
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
-        <upstreamVersion>0.7.0</upstreamVersion>
+        <upstreamVersion>0.7.1</upstreamVersion>
         <upstream.url>https://github.com/PasteStack/paste-elements</upstream.url>
         <upstream.release.skip>false</upstream.release.skip>
         <upstream.license.name>Apache License, Version 2.0</upstream.license.name>
