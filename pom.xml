@@ -141,7 +141,7 @@
             <properties>
                 <upstream.release.skip>true</upstream.release.skip>
                 <upstream.development.version>0.7.0</upstream.development.version>
-                <upstream.development.sha256>080bb7b3509a383bd521a59a4699cd05aa2774e846ddf0a546e53c257a2f4ec8</upstream.development.sha256>
+                <upstream.development.sha256>262557b0827f8aabb47d1103dc6fc51033f1c62d9db61c2248934f5fb8c64982</upstream.development.sha256>
                 <upstream.development.url>https://gitlab.com/api/v4/projects/76219410/packages/generic/paste-elements/0.7.1/paste-elements-0.7.1.tar.gz</upstream.development.url>
                 <upstream.license.name>Apache License, Version 2.0</upstream.license.name>
                 <upstream.license.url>https://www.apache.org/licenses/LICENSE-2.0</upstream.license.url>
