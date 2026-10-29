@@ -1,3 +1,19 @@
+# paste-elements-webjar v0.8.0
+
+**Date:** 2026-10-29
+
+## Changed
+
+- Packages `paste-elements` 0.8.0: the new `paste.ui.scrolltop` element
+  (a declared anchor to the current page returns to the top without a
+  reload) and smoothscroll's opt-in native motion via the
+  `--paste-smoothscroll-motion` custom property.
+- The development-upstream profile consumes the published
+  `paste-elements-0.8.0` generic package, pinned by sha256, keeping
+  non-tag builds on content whose VERSION matches `upstreamVersion`.
+
+---
+
 # paste-elements-webjar v0.7.1
 
 **Date:** 2026-10-28
