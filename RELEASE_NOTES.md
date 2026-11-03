@@ -1,3 +1,17 @@
+# paste-elements-webjar v0.9.0
+
+**Date:** 2026-11-02
+
+## Changed
+
+- Packages `paste-elements` 0.9.0: `data-spy-history` lets the address
+  follow scrollspy's settled section, replacing the current entry's
+  fragment and never touching one the nav did not write.
+- The development-upstream profile consumes the published
+  `paste-elements-0.9.0` generic package, pinned by sha256.
+
+---
+
 # paste-elements-webjar v0.8.1
 
 **Date:** 2026-10-29
